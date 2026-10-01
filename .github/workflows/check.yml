@@ -1,0 +1,42 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tool tests
+        run: python3 -m unittest discover -s tools
+      - name: Every entry
+        run: python3 tools/registry.py check
+      - name: The entries this change adds or edits, against their latest release
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE: origin/${{ github.base_ref }}
+        run: |
+          changed=$(git diff --name-only --diff-filter=AMR "$BASE...HEAD" -- packages)
+          if [ -n "$changed" ]; then
+            python3 tools/registry.py check --online $changed
+          else
+            echo "no entry changed"
+          fi
+      - name: Entries change only by their maintainers
+        if: github.event_name == 'pull_request'
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          BASE: origin/${{ github.base_ref }}
+        run: python3 tools/registry.py owners --author "$AUTHOR" --base "$BASE" --admins gilbertorconde

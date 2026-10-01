@@ -1,0 +1,9 @@
+# The example workbench: round, hex, square and flanged spacers and
+# standoffs. Also the repository to start a package from.
+id = "example.spacers"
+name = "Spacers"
+description = "Round, hex, square and flanged spacers and standoffs for printing"
+repository = "gilbertorconde/PrintCAD-example-wb"
+maintainers = ["gilbertorconde"]
+license = "MIT OR Apache-2.0"
+categories = ["parts", "printing"]
