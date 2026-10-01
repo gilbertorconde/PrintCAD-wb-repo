@@ -1,0 +1,10 @@
+# Standard hardware for printed designs: screws, nuts, washers, T-slot
+# extrusions, heat-set inserts, bearings, magnets, rods and springs, each
+# sized from its standard, with a drawing of the part in its panel.
+id = "io.github.gilbertorconde.hardware"
+name = "Hardware"
+description = "Screws, nuts, washers, T-slot extrusions, heat-set inserts, bearings, magnets, rods and springs, sized from their standards"
+repository = "gilbertorconde/PrintCAD-hardware-lib-wb"
+maintainers = ["gilbertorconde"]
+license = "MIT OR Apache-2.0"
+categories = ["fasteners", "parts", "printing"]
