@@ -16,7 +16,7 @@ id = "acme.cam"
 name = "CAM"
 description = "Toolpaths for milling"
 repository = "acme/printcad-cam"
-maintainers = ["acme-dev"]
+maintainers = ["acme", "acme-dev"]
 license = "MIT"
 categories = ["printing"]
 """
@@ -69,13 +69,26 @@ class Entries(unittest.TestCase):
         path, entry = entry_at(
             "acme.cam.toml",
             GOOD.replace('["printing"]', '["cooking"]')
-            .replace('["acme-dev"]', '["not a login"]')
+            .replace('["acme", "acme-dev"]', '["acme", "not a login"]')
             .replace("acme/printcad-cam", "https://github.com/acme/printcad-cam"),
         )
         problems = registry.entry_problems(path, entry)
         self.assertTrue(any("not a category" in p for p in problems))
         self.assertTrue(any("not a GitHub login" in p for p in problems))
         self.assertIn("`repository` should be `owner/name` on GitHub", problems)
+
+    def test_the_repository_s_owner_is_among_the_maintainers(self):
+        path, entry = entry_at(
+            "acme.cam.toml", GOOD.replace('["acme", "acme-dev"]', '["acme-dev"]')
+        )
+        self.assertIn(
+            "`maintainers` should include `acme`, who owns acme/printcad-cam",
+            registry.entry_problems(path, entry),
+        )
+        path, entry = entry_at(
+            "acme.cam.toml", GOOD.replace('["acme", "acme-dev"]', '["ACME"]')
+        )
+        self.assertEqual(registry.entry_problems(path, entry), [])
 
     def test_a_removed_entry_says_why(self):
         path, entry = entry_at("acme.cam.toml", GOOD + 'removed = " "\n')

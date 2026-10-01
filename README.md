@@ -24,7 +24,7 @@ without the registry. Being listed only makes a package easy to find.
    name = "CAM"
    description = "Toolpaths for milling, from the solids in a document"
    repository = "acme/printcad-cam"
-   maintainers = ["acme-dev"]
+   maintainers = ["acme", "acme-dev"]
    license = "MIT"
    categories = ["printing"]
    ```
@@ -41,7 +41,7 @@ without the registry. Being listed only makes a package easy to find.
 | `name` | Its name as printCAD shows it. |
 | `description` | One sentence, at most 200 characters. |
 | `repository` | `owner/name` on GitHub. Its latest release is what printCAD installs. |
-| `maintainers` | GitHub logins of who may change the entry. |
+| `maintainers` | GitHub logins of who may change the entry. The repository's owner (the user or organisation before the `/`) must be one of them. |
 | `license` | The package's license, an SPDX expression. |
 | `categories` | One or more of `modeling`, `sketching`, `parts`, `fasteners`, `printing`, `analysis`, `import-export`, `assembly`, `utilities`. |
 | `homepage` | Optional: an `https://` address for its documentation. |
@@ -63,7 +63,9 @@ On every pull request:
   the workbench contract printCAD speaks. The checks' summary lists what
   it asks to reach beyond its own folder;
 - an entry is added by one of its maintainers, and changed or removed only
-  by one of the maintainers it had.
+  by one of the maintainers it had;
+- the repository's owner is among an entry's maintainers, so a package is
+  listed only with its owner named.
 
 ## Releases and updates
 

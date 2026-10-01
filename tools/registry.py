@@ -131,6 +131,15 @@ def entry_problems(path: Path, entry: dict) -> list[str]:
     for login in maintainers:
         if not isinstance(login, str) or not LOGIN.match(login):
             problems.append(f"`{login}` is not a GitHub login")
+    # Whoever owns the repository is among those who list it, so an entry
+    # cannot list someone else's package. GitHub logins ignore case.
+    owner = entry["repository"].split("/")[0]
+    if REPOSITORY.match(entry["repository"]) and owner.lower() not in (
+        str(login).lower() for login in maintainers
+    ):
+        problems.append(
+            f"`maintainers` should include `{owner}`, who owns {entry['repository']}"
+        )
     categories = entry["categories"]
     if not categories:
         problems.append("`categories` needs at least one")
