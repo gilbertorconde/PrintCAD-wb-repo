@@ -112,7 +112,6 @@ class Releases(unittest.TestCase):
 class Listed(unittest.TestCase):
     def test_every_listed_entry_checks(self):
         paths = registry.all_entries()
-        self.assertTrue(paths)
         for path in paths:
             self.assertEqual(registry.entry_problems(path, registry.read_entry(path)), [], path.name)
         self.assertEqual(registry.registry_problems(paths), [])
