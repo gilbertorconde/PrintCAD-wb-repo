@@ -36,6 +36,10 @@ PACKAGES = ROOT / "packages"
 # The index's format; printCAD reads the versions it knows.
 SCHEMA = 1
 
+# What printCAD calls this store. A copy of the registry run as a store of
+# its own gives it its own name.
+NAME = "printCAD workbench registry"
+
 # The workbench contract printCAD speaks: a package built against another
 # major version (another minor one before 1.0) does not load.
 API = "0.1"
@@ -379,6 +383,7 @@ def cmd_index(args) -> int:
         packages.append(item)
     index = {
         "schema": SCHEMA,
+        "name": NAME,
         "api": API,
         "generated": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "packages": packages,

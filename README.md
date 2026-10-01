@@ -81,6 +81,16 @@ your computer and `network` lets it reach the internet. The registry checks
 that a package is what it says it is; it does not audit its code. Install
 what you trust, and allow only what a package needs.
 
+## Running your own store
+
+printCAD reads any number of stores (Preferences › Workbench packages ›
+Browse › Stores), this one first on a new install but removable like any
+other. To run one of your own, copy this repository, set `NAME` in
+`tools/registry.py` to what printCAD should call it, replace the entries
+with yours, and publish the index the same way. Its address is
+`https://<owner>.github.io/<repository>/index.json`; whoever adds it in
+printCAD sees its packages beside everyone else's.
+
 ## Running the tools
 
 Python 3.11 or newer, nothing else:
