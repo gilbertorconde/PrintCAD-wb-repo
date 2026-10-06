@@ -1,0 +1,10 @@
+# CAM: pocket operations cleared in a zig-zag that keeps the tool inside
+# a sketch's outline and around its islands, worked out as a job and
+# saved as G-code, with a tool table in Preferences.
+id = "io.github.gilbertorconde.cam"
+name = "CAM"
+description = "Pocket toolpaths from a sketch's outline, written as G-code"
+repository = "gilbertorconde/PrintCAD-cam-wb"
+maintainers = ["gilbertorconde"]
+license = "MIT OR Apache-2.0"
+categories = ["import-export", "utilities"]
