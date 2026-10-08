@@ -7,6 +7,7 @@ import io
 import tarfile
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import registry
@@ -114,6 +115,23 @@ class Releases(unittest.TestCase):
             registry.manifest_of(archive({"bench.wasm": "\0asm"}))
         with self.assertRaisesRegex(registry.Problem, "not an archive"):
             registry.manifest_of(b"not a tar")
+
+    def test_a_mirrored_release_is_kept_in_the_site_and_listed_there(self):
+        data = archive({"./bench.toml": 'id = "acme.cam"\napi = "printcad:workbench@0.1"\n', "./bench.wasm": "\0asm"})
+        release = {
+            "tag_name": "v1.2/rc",
+            "assets": [{"name": "cam.pcbench", "browser_download_url": "https://github.example/cam.pcbench"}],
+        }
+        entry = {"id": "acme.cam", "repository": "acme/printcad-cam"}
+        with tempfile.TemporaryDirectory() as site, \
+                mock.patch.object(registry, "latest_release", return_value=release), \
+                mock.patch.object(registry, "download", return_value=data):
+            plain = registry.release_of(entry)
+            self.assertNotIn("mirror", plain)
+            listed = registry.release_of(entry, (Path(site), "https://acme.github.io/registry/"))
+            self.assertEqual(listed["mirror"], "https://acme.github.io/registry/packages/acme.cam-v1.2_rc.pcbench")
+            self.assertEqual((Path(site) / "packages" / "acme.cam-v1.2_rc.pcbench").read_bytes(), data)
+            self.assertEqual(listed["url"], "https://github.example/cam.pcbench")
 
     def test_the_contract_matches_by_major_version(self):
         self.assertTrue(registry.api_compatible("printcad:workbench@0.1"))

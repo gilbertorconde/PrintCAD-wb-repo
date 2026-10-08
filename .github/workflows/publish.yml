@@ -29,10 +29,16 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - id: pages
+        uses: actions/configure-pages@v5
+      # Each release's archive is kept on the site too: a browser page
+      # cannot fetch a release's own download.
       - name: Build the index
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 tools/registry.py index --out site/index.json
+        run: >-
+          python3 tools/registry.py index --out site/index.json
+          --mirror site --base "${{ steps.pages.outputs.base_url }}"
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site

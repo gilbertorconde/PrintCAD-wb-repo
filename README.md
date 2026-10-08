@@ -108,7 +108,10 @@ python3 tools/registry.py index --out site/index.json
 limit on requests.
 
 The index is published by `.github/workflows/publish.yml` to GitHub Pages;
-the repository's Settings › Pages takes its source from GitHub Actions.
+the repository's Settings › Pages takes its source from GitHub Actions. The
+site keeps a copy of each listed release's archive under `packages/`, named
+in the index as the release's `mirror`: printCAD in a browser installs from
+it, since a GitHub release's own download refuses a page's requests.
 
 ## License
 

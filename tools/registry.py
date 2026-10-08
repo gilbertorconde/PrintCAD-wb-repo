@@ -6,11 +6,16 @@ library (Python 3.11 or newer).
     registry.py owners --author LOGIN --base REF
                                              check a change touches only
                                              entries its author maintains
-    registry.py index [--out index.json]     build the index printCAD reads
+    registry.py index [--out index.json] [--mirror DIR --base URL]
+                                             build the index printCAD reads
 
 `--online` and `index` read each package's latest GitHub release: they
 download its `.pcbench`, check it against GitHub's sha256 and read the
 `bench.toml` inside. `GITHUB_TOKEN`, when set, is sent with the requests.
+With `--mirror`, `index` also keeps each release's archive under
+`DIR/packages/` and lists it as `mirror` at `URL/packages/...`: a release's
+own download refuses a browser page's requests, and the site's copy does
+not.
 """
 
 from __future__ import annotations
@@ -246,9 +251,16 @@ def api_compatible(api: str) -> bool:
     return major(api.strip().removeprefix("printcad:workbench@")) == major(API)
 
 
-def release_of(entry: dict) -> dict:
+def mirror_name(entry_id: str, tag: str) -> str:
+    """The file a release's archive is kept as on the site."""
+    return f"{entry_id}-{re.sub(r'[^A-Za-z0-9._-]', '_', tag)}.pcbench"
+
+
+def release_of(entry: dict, mirror: tuple[Path, str] | None = None) -> dict:
     """The entry's latest release as printCAD installs it: checked against
-    GitHub's digest, its manifest read and matched with the entry."""
+    GitHub's digest, its manifest read and matched with the entry. With
+    `mirror` (the site's folder and its address), the archive is kept in
+    the site and named as the release's `mirror`."""
     repo = entry["repository"]
     release = latest_release(repo)
     asset = next(
@@ -269,7 +281,7 @@ def release_of(entry: dict) -> dict:
     if not api_compatible(api):
         raise Problem(f"the release targets {api}; printCAD speaks printcad:workbench@{API}")
     capabilities = manifest.get("capabilities", {})
-    return {
+    listed = {
         "tag": release.get("tag_name"),
         "version": manifest.get("version"),
         "api": api,
@@ -286,6 +298,13 @@ def release_of(entry: dict) -> dict:
             "network": bool(capabilities.get("network", False)),
         },
     }
+    if mirror is not None:
+        site, base = mirror
+        name = mirror_name(entry["id"], str(release.get("tag_name", "")))
+        (site / "packages").mkdir(parents=True, exist_ok=True)
+        (site / "packages" / name).write_bytes(data)
+        listed["mirror"] = f"{base.rstrip('/')}/packages/{name}"
+    return listed
 
 
 # ---------------------------------------------------------------- commands
@@ -373,6 +392,10 @@ def cmd_owners(args) -> int:
 
 
 def cmd_index(args) -> int:
+    if (args.mirror is None) != (args.base is None):
+        print("--mirror and --base go together", file=sys.stderr)
+        return 2
+    mirror = (Path(args.mirror), args.base) if args.mirror else None
     packages = []
     for path in all_entries():
         entry = read_entry(path)
@@ -383,7 +406,7 @@ def cmd_index(args) -> int:
         item = {key: entry[key] for key in [*REQUIRED, *OPTIONAL] if key in entry}
         if "removed" not in entry:
             try:
-                item["release"] = release_of(entry)
+                item["release"] = release_of(entry, mirror)
             except Problem as e:
                 # Listed, but nothing to install until it is put right.
                 item["release"] = None
@@ -418,6 +441,8 @@ def main() -> int:
     owners.set_defaults(run=cmd_owners)
     index = sub.add_parser("index", help="build the index")
     index.add_argument("--out", default="site/index.json")
+    index.add_argument("--mirror", help="the site's folder, to keep each release's archive in")
+    index.add_argument("--base", help="the site's address, for the archives kept there")
     index.set_defaults(run=cmd_index)
     args = parser.parse_args()
     return args.run(args)
